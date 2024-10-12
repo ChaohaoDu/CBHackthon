@@ -5,7 +5,7 @@ import { chatCompletion } from './lib/openai.js';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 app.use(express.json());
 
@@ -29,6 +29,10 @@ app.post('/api/get-script', async (req, res) => {
 app.post('/api/get-video', async (req, res) => {
   const { script } = req.body;
   return res.json(script);
+});
+
+app.get('/', (req, res) => {
+  return res.json(`[server]: Server is running at http://localhost:${port}`);
 });
 
 app.listen(port, () => {

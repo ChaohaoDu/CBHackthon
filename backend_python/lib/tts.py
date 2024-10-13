@@ -4,6 +4,7 @@ from pydub import AudioSegment
 import json
 from dotenv import load_dotenv
 
+
 load_dotenv()
 client = openai.OpenAI()
 

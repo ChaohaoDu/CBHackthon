@@ -39,3 +39,53 @@ next-env.d.ts
 .vscode
 
 .env
+
+.venv
+
+# Python cache and compiled files
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment directory
+venv
+.env
+.venv
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+*.pyo
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints
+
+# IDE-specific files
+.vscode
+.idea
+
+# MacOS and Windows files
+.DS_Store
+Thumbs.db
+
+# Uvicorn logs
+uvicorn.log
+
+# Node modules (if using frontend in the same repo)
+node_modules
+# Dependencies and ython egg info
+*.egg-info
+pip-log.txt
+
+# Docker files (if applicable)
+docker-compose.override.yml

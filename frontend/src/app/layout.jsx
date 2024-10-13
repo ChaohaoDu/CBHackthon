@@ -25,9 +25,7 @@ export default function RootLayout({children}) {
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
     <PromptProvider>
-      {/*<Transition>*/}
-        {children}
-      {/*</Transition>*/}
+      {children}
     </PromptProvider>
     </body>
     </html>

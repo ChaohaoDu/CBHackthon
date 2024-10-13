@@ -1,13 +1,15 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {usePrompt} from '../../context/promptContext';
-import {useRouter} from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axiosInstance from '../../lib/axiosInstance';
 import Transition from "../transition";
+import { Button } from "@/components/ui/button";
+import { usePrompt } from "@/context/promptContext";
+import { Input } from "@/components/ui/input";
 
 export default function ScriptPage() {
-  const {prompt, script, setScript} = usePrompt();
+  const { prompt, script, setScript } = usePrompt();
   const [suggestion, setSuggestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,7 +18,7 @@ export default function ScriptPage() {
   const fetchScript = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.post('/get-script', {prompt});
+      const response = await axiosInstance.post('/get-script', { prompt });
       setScript(response.data.script);
     } catch (err) {
       console.error('Error fetching script:', err);
@@ -62,50 +64,49 @@ export default function ScriptPage() {
 
   return (
     <Transition>
-      <div style={{padding: '20px', textAlign: 'center'}}>
-        <h1>Your Script</h1>
+      <div className="flex flex-col items-center justify-center h-screen w-screen p-6 space-y-5">
+        {/* Title aligned to the left */}
+        <div className="w-full max-w-lg">
+          <h1 className="text-3xl font-semibold text-left">Your Script</h1>
+        </div>
+
         {loading ? (
-          <p style={{marginTop: '20px', fontSize: '18px'}}>Loading...</p>
+          <p className="mt-4 text-lg">Loading...</p>
         ) : error ? (
-          <p style={{marginTop: '20px', color: 'red', fontSize: '18px'}}>
-            {error}
-          </p>
+          <p className="mt-4 text-lg text-red-500">{error}</p>
         ) : (
           <>
-            <p style={{whiteSpace: 'pre-wrap', marginTop: '20px', fontSize: '18px'}}>
+            <p className="whitespace-pre-wrap mt-4 text-lg w-full max-w-lg">
               {script || 'No script available.'}
             </p>
-            <textarea
-              value={suggestion}
-              onChange={(e) => setSuggestion(e.target.value)}
-              placeholder="Enter your suggestion..."
-              rows="4"
-              cols="50"
-              style={{marginTop: '20px', padding: '10px', fontSize: '16px'}}
-            />
-            <br/>
-            <button
-              onClick={updateScript}
-              style={{marginTop: '10px', padding: '10px 20px', fontSize: '16px'}}
-            >
-              Update Script
-            </button>
+
+            {/* Input and Update Button Row */}
+            <div className="w-full max-w-lg flex space-x-2 mt-4">
+              <Input
+                type="text"
+                value={suggestion}
+                onChange={(e) => setSuggestion(e.target.value)}
+                placeholder="Enter your suggestion..."
+                className="flex-1"
+              />
+              <Button onClick={updateScript} className="px-4 py-2">
+                Update Script
+              </Button>
+            </div>
           </>
         )}
 
-        <div style={{marginTop: '20px'}}>
-          <button
+        <div className="w-full max-w-lg flex justify-between mt-6">
+          <Button
             onClick={handleBack}
-            style={{marginRight: '10px', padding: '10px 20px', fontSize: '16px'}}
           >
             Back
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleNextPage}
-            style={{padding: '10px 20px', fontSize: '16px'}}
           >
             Next Page
-          </button>
+          </Button>
         </div>
       </div>
     </Transition>

@@ -1,3 +1,5 @@
+from venv import logger
+
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
@@ -36,6 +38,7 @@ class ScriptModel(BaseModel):
 @app.post("/api/get-script")
 async def get_script(prompt_data: PromptModel):
     prompt = prompt_data.prompt
+    logger.info(f"Prompt: {prompt}")
     if not prompt:
         raise HTTPException(status_code=400, detail="Prompt is required.")
     try:

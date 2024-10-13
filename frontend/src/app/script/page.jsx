@@ -65,7 +65,6 @@ export default function ScriptPage() {
   return (
     <Transition>
       <div className="flex flex-col items-center justify-center h-screen w-screen p-6 space-y-5">
-        {/* Title aligned to the left */}
         <div className="w-full max-w-lg">
           <h1 className="text-3xl font-semibold text-left">Your Script</h1>
         </div>
@@ -80,7 +79,6 @@ export default function ScriptPage() {
               {script || 'No script available.'}
             </p>
 
-            {/* Input and Update Button Row */}
             <div className="w-full max-w-lg flex space-x-2 mt-4">
               <Input
                 type="text"

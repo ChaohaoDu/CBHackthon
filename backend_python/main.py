@@ -1,4 +1,4 @@
-from venv import logger
+import logging
 
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
@@ -9,6 +9,9 @@ import os
 
 from lib.jockey import get_sample_pics
 from lib.openai_lib import chat_completion
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -76,8 +79,22 @@ async def get_samples(prompt_data: PromptModel):
         print(response)
         return {"samples": response}
     except Exception as e:
-        print(f"Error fetching response from OpenAI: {e}")
+        print(f"Error fetching response from Jockey: {e}")
         raise HTTPException(status_code=500, detail="Failed to get sample pictures")
+    
+@app.post("/api/get-video")
+async def get_video(prompt_data: PromptModel):
+    prompt = prompt_data.prompt
+    logger.info(f"Prompt: {prompt}")
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Prompt is required.")
+    try:
+        response = await get_video(prompt)
+        print(response)
+        return {"video": response}
+    except Exception as e:
+        print(f"Error fetching response from Jockey: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get video")
 
 
 @app.post("/api/update-script")

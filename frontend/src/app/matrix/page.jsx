@@ -9,7 +9,7 @@ import {Button} from "@/components/ui/button";
 export default function MatrixPage() {
   const router = useRouter();
   const {script} = usePrompt();
-  const [coords, setCoords] = usePrompt();
+  const {coords, setCoords} = usePrompt();
 
   const svgRef = useRef(null);
 

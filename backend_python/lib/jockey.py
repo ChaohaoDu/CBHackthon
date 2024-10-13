@@ -144,3 +144,71 @@ async def get_sample_pics(user_input):
 
     except Exception as e:
         raise RuntimeError(f"Error in get_sample_pics: {str(e)}")
+
+
+
+async def get_video(user_input):
+    try:
+        jockey = await get_jockey_assistant()
+        thread = await create_thread()
+
+        index_input = "Using index 66f1b1c8163dbc55ba3bb1b6."
+        story_board_input = "Please search for 3 clips, and return the title, a few tags and a thumbnail for each clip. No need to generate the video."
+
+        chat_history = [
+            HumanMessage(content=index_input + user_input + story_board_input, name="user")
+        ]
+        jockey_input = {
+            "chat_history": chat_history,
+            "made_plan": False,
+            "next_worker": None,
+            "active_plan": None,
+        }
+
+        retry_count = 0
+        success = False
+        output_events = []
+
+        while not success and retry_count < MAX_RETRIES:
+            try:
+                output_events = await stream_run(
+                    thread["thread_id"], jockey["assistant_id"], jockey_input
+                )
+                success = True
+            except Exception as e:
+                print(f"Error during streaming: {e}")
+                retry_count += 1
+                if retry_count < MAX_RETRIES:
+                    print(f"Retrying... ({retry_count}/{MAX_RETRIES})")
+                    await asyncio.sleep(RESET_DELAY)
+                else:
+                    raise RuntimeError("Max retries exceeded. Exiting...")
+
+        if not output_events:
+            raise RuntimeError("No output events received.")
+
+        data = output_events[-1].data
+        chat_history = data.get('chat_history', [])
+        assistant_message = next(
+            (msg.get('content', '') for msg in reversed(chat_history) if msg.get('type') == 'ai'),
+            None
+        )
+
+        if assistant_message:
+            print("Assistant's last message:")
+            print(assistant_message)
+            titles, tags = extract_video_title_tags(assistant_message)
+            urls = extract_url(assistant_message)
+            for tag in tags:
+                print(tag)
+
+            samples = [
+                {"imageUrl": url, "tags": tag.split(','), "title": title}
+                for title, tag, url in zip(titles, tags, urls)
+            ]
+            return samples
+        else:
+            raise HTTPException(status_code=404, detail="No assistant message found.")
+
+    except Exception as e:
+        raise RuntimeError(f"Error in get_sample_pics: {str(e)}")

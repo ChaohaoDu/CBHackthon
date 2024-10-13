@@ -6,12 +6,16 @@ from langchain_core.messages import HumanMessage
 from rich.jupyter import print
 from dotenv import load_dotenv
 from fastapi import HTTPException
+import logging
 
 load_dotenv()
 
 client = get_client()
 
-MAX_RETRIES = 3
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+MAX_RETRIES = 8
 RESET_DELAY = 10
 
 api_key = os.getenv('TWELVE_LABS_API_KEY')
@@ -98,49 +102,74 @@ async def get_sample_pics(user_input):
         }
 
         retry_count = 0
-        success = False
         output_events = []
 
-        while not success and retry_count < MAX_RETRIES:
-            try:
-                output_events = await stream_run(
-                    thread["thread_id"], jockey["assistant_id"], jockey_input
-                )
-                success = True
-            except Exception as e:
-                print(f"Error during streaming: {e}")
+        chat_history = [HumanMessage(content=index_input + user_input + story_board_input, name="user")]
+        jockey_input = {
+            "chat_history": chat_history,
+            "made_plan": False,
+            "next_worker": None,
+            "active_plan": None,
+        }
+
+        # Continue to retry until reaching MAX_RETRIES, or message is not None
+        assistant_message = None
+        while retry_count < MAX_RETRIES and assistant_message is None:
+            logger.info(f"Attempt {retry_count+1} of {MAX_RETRIES}")
+            output_events = []
+            # Start the streaming run
+            async for event in client.runs.stream(
+                thread["thread_id"], 
+                jockey["assistant_id"], 
+                input=jockey_input, 
+                stream_mode="values"
+            ):
+                # Check if the event contains the assistant's message
+                if event.event == 'values':
+                    data = event.data
+                    chat_history = data.get('chat_history', [])
+                    logger.debug(f"Received chat_history: {chat_history}")
+                    for message in reversed(chat_history):
+                        if message.get('type') == 'ai':
+                            assistant_message = message.get('content', '')
+                            break  # Exit the inner loop
+
+                    if assistant_message:
+
+                        # Processing the Assistant message
+                        print("Assistant's last message:")
+                        print(assistant_message)
+
+                        titles, tags = extract_video_title_tags(assistant_message)
+                        urls = extract_url(assistant_message)
+                        for tag in tags:
+                            print(tag)
+
+                        samples = [
+                            {"imageUrl": url, "tags": tag.split(','), "title": title}
+                            for title, tag, url in zip(titles, tags, urls)
+                        ]
+                        return samples
+                    # else:
+                    #     raise HTTPException(status_code=404, detail="No assistant message found.")
+
+                else:
+                    # Handle other types of events if necessary
+                    pass
+            if assistant_message is None:
+                print("No message found. Retrying...")
                 retry_count += 1
                 if retry_count < MAX_RETRIES:
-                    print(f"Retrying... ({retry_count}/{MAX_RETRIES})")
-                    await asyncio.sleep(RESET_DELAY)
+                    await asyncio.sleep(1)  # Optional delay before retrying
                 else:
-                    raise RuntimeError("Max retries exceeded. Exiting...")
+                    print("Maximum retries reached. Exiting.")
+
+        """"
+        End
+        """
 
         if not output_events:
             raise RuntimeError("No output events received.")
-
-        data = output_events[-1].data
-        chat_history = data.get('chat_history', [])
-        assistant_message = next(
-            (msg.get('content', '') for msg in reversed(chat_history) if msg.get('type') == 'ai'),
-            None
-        )
-
-        if assistant_message:
-            print("Assistant's last message:")
-            print(assistant_message)
-            titles, tags = extract_video_title_tags(assistant_message)
-            urls = extract_url(assistant_message)
-            for tag in tags:
-                print(tag)
-
-            samples = [
-                {"imageUrl": url, "tags": tag.split(','), "title": title}
-                for title, tag, url in zip(titles, tags, urls)
-            ]
-            return samples
-        else:
-            raise HTTPException(status_code=404, detail="No assistant message found.")
 
     except Exception as e:
         raise RuntimeError(f"Error in get_sample_pics: {str(e)}")
@@ -153,10 +182,11 @@ async def get_video(user_input):
         thread = await create_thread()
 
         index_input = "Using index 66f1b1c8163dbc55ba3bb1b6."
-        story_board_input = "Please search for 3 clips, and return the title, a few tags and a thumbnail for each clip. No need to generate the video."
+        video_input = "After you find 3 clips, let's edit them together into one video. Don't generate text summaries."
+        # story_board_input = "Please search for 3 clips, and return the title, a few tags and a thumbnail for each clip. No need to generate the video."
 
         chat_history = [
-            HumanMessage(content=index_input + user_input + story_board_input, name="user")
+            HumanMessage(content=index_input + user_input + video_input, name="user")
         ]
         jockey_input = {
             "chat_history": chat_history,

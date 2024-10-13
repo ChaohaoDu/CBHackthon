@@ -18,7 +18,6 @@ export default function MatrixPage() {
   }, [script, router]);
 
 
-
   return (
     <Transition>
       <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>

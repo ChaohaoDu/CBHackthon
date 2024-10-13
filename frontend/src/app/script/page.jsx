@@ -10,7 +10,7 @@ import {Input} from "@/components/ui/input";
 import {ScrollArea} from "@/components/ui/scroll-area";
 
 export default function ScriptPage() {
-  const {prompt, script, setScript} = usePrompt();
+  const {prompt, script, setScript, coords} = usePrompt();
   const [suggestion, setSuggestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -48,7 +48,7 @@ export default function ScriptPage() {
   };
 
   useEffect(() => {
-    if (!prompt) {
+    if (!prompt || !coords) {
       router.push('/'); // Redirect to root if prompt is empty
     } else {
       fetchScript();
@@ -60,7 +60,7 @@ export default function ScriptPage() {
   };
 
   const handleNextPage = () => {
-    router.push('/matrix'); // Navigate to next page
+    router.push('/result');
   };
 
   return (

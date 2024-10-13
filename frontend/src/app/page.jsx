@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   const goScriptPage = () => {
-    router.push('/script');
+    router.push('/matrix');
   };
 
   return (
@@ -98,8 +98,7 @@ export default function Home() {
                   <div key={index} className="flex space-x-5 w-full">
                     <div className="w-1/2">
                       {result.imageUrl.endsWith('.mp4') || result.imageUrl.endsWith('.webm') || result.imageUrl.endsWith('.m3u8') ? (
-                        // <VideoThumbnail videoUrl={result.imageUrl}/>
-                        <video ref={videoRef} src={videoUrl} style={{display: 'none'}}/>
+                        <video src={videoUrl} style={{display: 'none'}}/>
                       ) : (
                         <img
                           src={result.imageUrl}

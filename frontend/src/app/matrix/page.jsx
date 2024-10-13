@@ -9,12 +9,12 @@ import {Button} from "@/components/ui/button";
 export default function MatrixPage() {
   const router = useRouter();
   const {script} = usePrompt();
-  const [coords, setCoords] = useState({x: 0.5, y: -0.5});
+  const [coords, setCoords] = usePrompt();
 
   const svgRef = useRef(null);
 
   useEffect(() => {
-    if (!script) {
+    if (!prompt) {
       router.push('/');
     }
   }, [script, router]);
@@ -32,11 +32,7 @@ export default function MatrixPage() {
   };
 
   const handleNextPage = () => {
-    const humorous = Math.abs(coords.x);
-    const dense = Math.abs(coords.y);
-
-
-    router.push('/result');
+    router.push('/script');
   };
 
   return (

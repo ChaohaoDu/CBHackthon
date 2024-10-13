@@ -1,7 +1,7 @@
 'use client';
 import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {usePrompt} from "../../context/promptContext";
+import {usePrompt} from "@/context/promptContext";
 import Draggable from "react-draggable";
 import Transition from "../transition";
 import {Button} from "@/components/ui/button";
@@ -9,6 +9,8 @@ import {Button} from "@/components/ui/button";
 export default function MatrixPage() {
   const router = useRouter();
   const {script} = usePrompt();
+  const [coords, setCoords] = useState({x: 0.5, y: -0.5});
+
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -17,59 +19,96 @@ export default function MatrixPage() {
     }
   }, [script, router]);
 
-  const [coords, setCoords] = useState({x: 0, y: 0});
 
   const handleDrag = (e, data) => {
-    const mappedX = (data.x / 150).toFixed(2);
-    const mappedY = (-data.y / 150).toFixed(2);
-
-    setCoords({x: mappedX, y: mappedY});
+    const newX = data.x / 300; // Normalize between -1 and 1
+    const newY = -data.y / 300; // SVG Y-axis is inverted
+    setCoords({x: newX.toFixed(2), y: newY.toFixed(2)});
   };
 
-  const handleSvgClick = (e) => {
-    const svg = svgRef.current;
-    const rect = svg.getBoundingClientRect();
-
-    const x = e.clientX - rect.left - 150;
-    const y = e.clientY - rect.top - 150;
-
-    const mappedX = (x / 150);
-    const mappedY = (-y / 150);
-
-    setCoords({x: mappedX.toFixed(2), y: mappedY.toFixed(2)});
-  };
 
   const handleBack = () => {
     router.back();
   };
 
   const handleNextPage = () => {
+    const humorous = Math.abs(coords.x);
+    const dense = Math.abs(coords.y);
+
+
     router.push('/result');
   };
 
   return (
     <Transition>
-      <div className="flex flex-col items-center justify-center h-screen w-screen space-y-5 p-6">
-        <h1 className="text-3xl font-semibold">Drag the point and get coordinates</h1>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <h1 className="text-3xl font-semibold text-left pb-2">Customize Your Script</h1>
 
         <div
-          className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '20px', background: 'linear-gradient(#333, #111)'
+          }}
+        >
           <svg
             ref={svgRef}
             width="300"
             height="300"
-            className="border border-white rounded-lg shadow-lg bg-opacity-30 backdrop-blur-md"
-            onClick={handleSvgClick}
+            style={{
+              borderRadius: '20px',
+              background: 'linear-gradient(#333, #111)',
+            }}
           >
-            <line x1="0" y1="150" x2="300" y2="150" stroke="white" strokeWidth="2"/>
-            <line x1="150" y1="0" x2="150" y2="300" stroke="white" strokeWidth="2"/>
+            {/* Grid Background */}
+            <defs>
+              <pattern
+                id="grid"
+                width="30"
+                height="30"
+                patternUnits="userSpaceOnUse"
+              >
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#444" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)"/>
+
+            <text x="150" y="20" textAnchor="middle" fill="#aaa" fontSize="12">
+              RELAXED
+            </text>
+            <text x="150" y="290" textAnchor="middle" fill="#aaa" fontSize="12">
+              DENSE
+            </text>
+            <text
+              x="20"
+              y="150"
+              textAnchor="middle"
+              fill="#aaa"
+              fontSize="12"
+              transform="rotate(-90 20,150)"
+            >
+              PROFESSIONAL
+            </text>
+            <text
+              x="280"
+              y="150"
+              textAnchor="middle"
+              fill="#aaa"
+              fontSize="12"
+              transform="rotate(90 280,150)"
+            >
+              HUMOROUS
+            </text>
 
             <Draggable
-              position={{x: coords.x * 150, y: -coords.y * 150}}
-              bounds={{left: -150, right: 150, top: -150, bottom: 150}}
+              position={{x: coords.x * 300, y: -coords.y * 300}}
+              bounds={{left: 0, right: 300, top: 0, bottom: 300}}
               onDrag={handleDrag}
             >
-              <circle cx="150" cy="150" r="10" fill="yellow" stroke="black" strokeWidth="2"/>
+              <g transform="translate(150, 150)"> {/* Center the draggable group */}
+                <circle r="20" fill="gray" stroke="white" strokeWidth="2"/>
+              </g>
             </Draggable>
           </svg>
         </div>
@@ -80,10 +119,11 @@ export default function MatrixPage() {
         </p>
 
         <div className="w-full max-w-lg flex justify-between mt-6">
-          <Button onClick={handleBack}>Back</Button>
-          <Button onClick={handleNextPage}>Next Page</Button>
+          <Button variant="secondary" onClick={handleBack}>Back</Button>
+          <Button onClick={handleNextPage}>Generate Video!</Button>
         </div>
       </div>
     </Transition>
   );
 }
+

@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
 import axiosInstance from '../../lib/axiosInstance';
 import Transition from "../transition";
-import { Button } from "@/components/ui/button";
-import { usePrompt } from "@/context/promptContext";
-import { Input } from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {usePrompt} from "@/context/promptContext";
+import {Input} from "@/components/ui/input";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 export default function ScriptPage() {
-  const { prompt, script, setScript } = usePrompt();
+  const {prompt, script, setScript} = usePrompt();
   const [suggestion, setSuggestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ export default function ScriptPage() {
   const fetchScript = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.post('/get-script', { prompt });
+      const response = await axiosInstance.post('/get-script', {prompt});
       setScript(response.data.script);
     } catch (err) {
       console.error('Error fetching script:', err);
@@ -32,11 +33,11 @@ export default function ScriptPage() {
     try {
       setLoading(true);
       const response = await axiosInstance.post('/update-script', {
-        prompt,
         script,
         suggestion,
       });
       setScript(response.data.script);
+      console.log(response.data.script);
       setSuggestion('');
     } catch (err) {
       console.error('Error updating script:', err);
@@ -66,7 +67,7 @@ export default function ScriptPage() {
     <Transition>
       <div className="flex flex-col items-center justify-center h-screen w-screen p-6 space-y-5">
         <div className="w-full max-w-lg">
-          <h1 className="text-3xl font-semibold text-left">Your Script</h1>
+          <h1 className="text-3xl font-semibold text-left">Script</h1>
         </div>
 
         {loading ? (
@@ -75,9 +76,9 @@ export default function ScriptPage() {
           <p className="mt-4 text-lg text-red-500">{error}</p>
         ) : (
           <>
-            <p className="whitespace-pre-wrap mt-4 text-lg w-full max-w-lg">
+            <ScrollArea className="h-[300px] max-w-lg rounded-md border p-4">
               {script || 'No script available.'}
-            </p>
+            </ScrollArea>
 
             <div className="w-full max-w-lg flex space-x-2 mt-4">
               <Input
@@ -95,14 +96,10 @@ export default function ScriptPage() {
         )}
 
         <div className="w-full max-w-lg flex justify-between mt-6">
-          <Button
-            onClick={handleBack}
-          >
+          <Button variant={"secondary"} onClick={handleBack}>
             Back
           </Button>
-          <Button
-            onClick={handleNextPage}
-          >
+          <Button onClick={handleNextPage}>
             Next Page
           </Button>
         </div>

@@ -100,7 +100,7 @@ export default function ScriptPage() {
             Back
           </Button>
           <Button onClick={handleNextPage}>
-            Next Page
+            Generate Video!
           </Button>
         </div>
       </div>

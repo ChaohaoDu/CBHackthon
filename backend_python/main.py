@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-from lib.jockey import get_sample_pics
+from lib.jockey import get_sample_pics, get_final_video
 from lib.openai_lib import chat_completion
 
 logging.basicConfig(level=logging.INFO)
@@ -89,8 +89,8 @@ async def get_video(prompt_data: PromptModel):
     if not prompt:
         raise HTTPException(status_code=400, detail="Prompt is required.")
     try:
-        response = await get_video(prompt)
-        print(response)
+        response = await get_final_video(prompt)
+        print("RESPONSE: ", response)
         return {"video": response}
     except Exception as e:
         print(f"Error fetching response from Jockey: {e}")

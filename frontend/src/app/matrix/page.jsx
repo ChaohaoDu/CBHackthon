@@ -5,11 +5,14 @@ import {usePrompt} from "@/context/promptContext";
 import Draggable from "react-draggable";
 import Transition from "../transition";
 import {Button} from "@/components/ui/button";
+// import { useToast } from '@/hooks/use-toast';
 
 export default function MatrixPage() {
   const router = useRouter();
   const {script} = usePrompt();
   const {coords, setCoords} = usePrompt();
+  const {prompt} = usePrompt();
+  // const [loading, setLoading] = useState(false);
 
   const svgRef = useRef(null);
 
@@ -34,6 +37,7 @@ export default function MatrixPage() {
   const handleNextPage = () => {
     router.push('/script');
   };
+
 
   return (
     <Transition>
@@ -116,7 +120,7 @@ export default function MatrixPage() {
 
         <div className="w-full max-w-lg flex justify-between mt-6">
           <Button variant="secondary" onClick={handleBack}>Back</Button>
-          <Button onClick={handleNextPage}>Generate Video!</Button>
+          <Button onClick={handleNextPage}>Next Page</Button>
         </div>
       </div>
     </Transition>
